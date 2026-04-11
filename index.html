@@ -321,16 +321,11 @@ export default function TortenelmiNyomozoApp() {
   const [accusationNames, setAccusationNames] = useState("");
   const [accusationReason, setAccusationReason] = useState("");
   const [gameOver, setGameOver] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
+  const [showSolution, setShowSolution] = useState(true);
 
   const visibleCards = useMemo(() => CASE_DATA.cards.slice(0, revealedCount).reverse(), [revealedCount]);
   const hasMoreCards = revealedCount < CASE_DATA.cards.length;
   const selfTestsPassed = useMemo(() => runSelfTests(), []);
-  const solutionUnlocked =
-    revealedCount === CASE_DATA.cards.length &&
-    trackProgress.motivation >= 35 &&
-    trackProgress.opportunity >= 35 &&
-    trackProgress.coordination >= 35;
 
   const handleAnalyze = () => {
     const result = evaluateInput(currentInput, interactionMode, revealedCount);
@@ -869,20 +864,6 @@ export default function TortenelmiNyomozoApp() {
                 <Button onClick={resetGame} variant="outline" className="rounded-2xl">
                   Újrakezdés
                 </Button>
-                
-                      variant="secondary"
-                      className="rounded-2xl"
-                      disabled={!solutionUnlocked}
-                    >
-                      {showSolution ? "Megoldás elrejtése" : "Megoldás megjelenítése"}
-                    </Button>
-                    {!solutionUnlocked && (
-                      <p className="text-xs text-slate-500">
-                        A megoldás akkor nyílik meg, ha az összes kártyát felfedted, és a motiváció, lehetőség, valamint koordináció sáv legalább a „bizonytalan” szintet eléri.
-                      </p>
-                    )}
-                  </div>
-                )}
               </CardContent>
             </Card>
 
