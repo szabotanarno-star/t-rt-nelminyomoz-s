@@ -28,14 +28,8 @@ const CASE_DATA = {
     culprits: ["Elena Kovács", "Dubois"],
     summary:
       "A módosítás a hivatalos példány diktálása és gépelése során történt. Elena a nyelvi árnyalatokat kihasználva olyan megfogalmazást javasolt, amely nyelvileg korrekt maradt, de politikailag eltérő jelentést hordozott. Dubois adminisztratív hozzáféréssel és felügyeleti szereppel biztosította, hogy a módosított változat kerüljön véglegesítésre és gyors továbbításra.",
-    territory:
-      "A módosítás a Komárom–Komárno térségére vonatkozott a Duna mentén. Ez egy kis kiterjedésű, de stratégiai jelentőségű határszakasz volt, ahol fontos vasúti csomópont és dunai átkelőhely található.",
-    motive:
-      "A cél az volt, hogy a határvonal nyelvi finomításával a vasúti összeköttetés és a dunai átkelés ellenőrzése Csehszlovákiához kerüljön, ami gazdasági és katonai szempontból is előnyt jelentett a francia szövetségi rendszer számára.",
-    elenaMotive:
-      "Elena személyes motivációja az volt, hogy a térségben élő szláv közösségek helyzetét kívánta javítani, és úgy látta, hogy a határ finom módosítása hosszú távon stabilabb politikai és gazdasági helyzetet teremthet számukra. Emellett karrierje szempontjából is előnyt jelentett, ha megbízható közvetítőként bizonyít a francia delegáció felé.",
     whyTwo:
-      "Két emberre azért volt szükség, mert a láthatatlan módosításhoz egyszerre kellett nyelvi kontroll (Elena) és adminisztratív hozzáférés (Dubois). Egyikük önmagában nem tudta volna ilyen észrevétlenül végrehajtani a változtatást.",
+      "Két emberre azért volt szükség, mert a láthatatlan módosításhoz egyszerre kellett nyelvi kontroll és adminisztratív hozzáférés. Egyikük önmagában nem tudta volna ilyen észrevétlenül végrehajtani a változtatást.",
   },
   cards: [
     { id: 1, kind: "fact", title: "1. kártya", text: "A dokumentumot egy zárt tárgyaláson vitatták meg.", tags: ["eset", "keret"] },
@@ -293,7 +287,6 @@ function runSelfTests() {
     () => evaluateInput("A képen látható elhelyezkedés fontos.", "conclusion", 8).imageBonus === 5,
     () => getTrackDeltas("Duboisnak hozzáférése volt, és Elena nyelvi szerepe is fontos").opportunity > 0,
     () => checkAccusation("Elena Kovács és Dubois", "A diktálás és a nyelvi kontroll miatt két ember kellett").isCorrect,
-    () => typeof CASE_DATA.solution.whyTwo === "string" && CASE_DATA.solution.whyTwo.length > 10,
   ];
 
   return tests.every((test) => {
@@ -321,7 +314,7 @@ export default function TortenelmiNyomozoApp() {
   const [accusationNames, setAccusationNames] = useState("");
   const [accusationReason, setAccusationReason] = useState("");
   const [gameOver, setGameOver] = useState(false);
-  const [showSolution, setShowSolution] = useState(true);
+  const [showSolution, setShowSolution] = useState(false);
 
   const visibleCards = useMemo(() => CASE_DATA.cards.slice(0, revealedCount).reverse(), [revealedCount]);
   const hasMoreCards = revealedCount < CASE_DATA.cards.length;
@@ -446,17 +439,6 @@ export default function TortenelmiNyomozoApp() {
   const handleAccusation = () => {
     const result = checkAccusation(accusationNames, accusationReason);
 
-    const reasoning = normalizeText(accusationReason);
-    const mentionsWhy =
-      reasoning.includes("miert") ||
-      reasoning.includes("miért") ||
-      reasoning.includes("erdek") ||
-      reasoning.includes("érdek") ||
-      reasoning.includes("gazdasag") ||
-      reasoning.includes("gazdaság") ||
-      reasoning.includes("strategiai") ||
-      reasoning.includes("stratégiai");
-
     if (result.isCorrect) {
       setScore((prev) => prev + 1000);
       setGameOver(true);
@@ -465,23 +447,6 @@ export default function TortenelmiNyomozoApp() {
       setProgress(100);
       setTrackProgress({ motivation: 100, opportunity: 100, coordination: 100 });
       setImageSourceScore(100);
-
-      if (!mentionsWhy) {
-        setHistory((prev) => [
-          {
-            type: "accusation",
-            content: "Megoldottad az esetet, de a MIÉRT rész hiányos.",
-            result: {
-              level: "meleg",
-              delta: 0,
-              feedback: "A megoldás helyes, de nem magyaráztad meg a történelmi indítékot. Gondold végig: milyen gazdasági vagy stratégiai érdek állhatott mögötte?",
-              imageBonus: 0,
-            },
-            cardNumber: revealedCount,
-          },
-          ...prev,
-        ]);
-      }
     } else {
       setScore((prev) => prev - 500);
       setHistory((prev) => [
@@ -841,15 +806,6 @@ export default function TortenelmiNyomozoApp() {
                     <strong>Mi történt?</strong> {CASE_DATA.solution.summary}
                   </p>
                   <p>
-                    <strong>Melyik területet érintette?</strong> {CASE_DATA.solution.territory}
-                  </p>
-                  <p>
-                    <strong>Mi volt a valódi indíték?</strong> {CASE_DATA.solution.motive}
-                  </p>
-                  <p>
-                    <strong>Mi volt Elena személyes motivációja?</strong> {CASE_DATA.solution.elenaMotive}
-                  </p>
-                  <p>
                     <strong>Miért kellett két ember?</strong> {CASE_DATA.solution.whyTwo}
                   </p>
                   <div className="rounded-2xl bg-white/70 p-4 text-sm leading-6">
@@ -863,6 +819,9 @@ export default function TortenelmiNyomozoApp() {
               <CardContent className="flex flex-col gap-3 p-4 md:flex-row">
                 <Button onClick={resetGame} variant="outline" className="rounded-2xl">
                   Újrakezdés
+                </Button>
+                <Button onClick={() => setShowSolution((prev) => !prev)} variant="secondary" className="rounded-2xl">
+                  {showSolution ? "Megoldás elrejtése" : "Megoldás megjelenítése"}
                 </Button>
               </CardContent>
             </Card>
